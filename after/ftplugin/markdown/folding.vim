@@ -8,7 +8,7 @@ function! StackedMarkdownFolds()
   elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
     return "<2"
   endif
-  
+
   if HeadingDepth(v:lnum) > 0
     return ">1"
   else
@@ -16,14 +16,27 @@ function! StackedMarkdownFolds()
   endif
 endfunction
 
-function! NestedMarkdownFolds()
-  let thisline = getline(v:lnum)
-  let prevline = getline(v:lnum - 1)
-  let nextline = getline(v:lnum + 1)
+function! NestedMarkdownFolds(lnum)
+  let thisline = getline(a:lnum)
+  let prevline = getline(a:lnum - 1)
+  let nextline = getline(a:lnum + 1)
   if thisline =~ '^```.*$' && prevline =~ '^\s*$'  " start of a fenced block
     return "a1"
   elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
     return "s1"
+  endif
+
+  " Add list folding as well
+  " Do so via the following:
+  " 1. Figure out if list starts (prefix "-")
+  " 2. Figure out previous fold level as a result of the heading
+  " 3. Set fold level by adding heading fold level to list fold level
+  if thisline =~ '^ *-'
+    let currentListDepth = (len(matchstr(thisline, ' *-')) + 1) / 2
+    return ">" . (currentListDepth + s:HeadingDepthOfLine(a:lnum))
+  endif
+  if thisline == ""
+    return s:HeadingDepthOfLine(a:lnum)
   endif
 
   let depth = HeadingDepth(v:lnum)
@@ -37,6 +50,23 @@ endfunction
 " Helpers {{{1
 function! s:SID()
   return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfunction
+
+function! s:HeadingDepthOfLine(lnum)
+  let currentHeadingDepth = -1
+  let cursorPosition = [line("."), col(".")]
+  let currentLine = a:lnum
+  while currentHeadingDepth == -1
+    call cursor(currentLine, 1)
+    let [prevHeadingLnum, prevHeadingCol] = searchpos('^#\+', 'b')
+    let currentLine = prevHeadingLnum
+    if LineIsFenced(currentLine)
+      continue
+    endif
+    let currentHeadingDepth = HeadingDepth(currentLine)
+  endwhile
+  call cursor(cursorPosition)
+  return currentHeadingDepth
 endfunction
 
 function! HeadingDepth(lnum)
@@ -154,7 +184,7 @@ setlocal foldmethod=expr
 
 if g:markdown_fold_override_foldtext
   " let &l:foldtext = s:SID() . 'FoldText()'
-  setlocal foldtext=FoldTextWorkaround() 
+  setlocal foldtext=FoldTextWorkaround()
 endif
 
 let &l:foldexpr =
