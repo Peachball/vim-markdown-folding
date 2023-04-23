@@ -36,7 +36,11 @@ function! NestedMarkdownFolds(lnum)
     return ">" . (currentListDepth + s:HeadingDepthOfLine(a:lnum))
   endif
   if thisline == ""
-    return s:HeadingDepthOfLine(a:lnum)
+    return -1
+  endif
+  if thisline =~ '^ *'
+    let currentListDepth = len(matchstr(thisline, ' *')) / 2
+    return (currentListDepth + s:HeadingDepthOfLine(a:lnum))
   endif
 
   let depth = HeadingDepth(v:lnum)
