@@ -20,6 +20,10 @@ function! NestedMarkdownFolds(lnum)
   let thisline = getline(a:lnum)
   let prevline = getline(a:lnum - 1)
   let nextline = getline(a:lnum + 1)
+
+  call s:UpdateShortestHeader()
+
+  " Code block folding
   if thisline =~ '^```.*$' && prevline =~ '^\s*$'  " start of a fenced block
     return "a1"
   elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
@@ -33,19 +37,20 @@ function! NestedMarkdownFolds(lnum)
   " 3. Set fold level by adding heading fold level to list fold level
   if thisline =~ '^ *-'
     let currentListDepth = (len(matchstr(thisline, ' *-')) + 1) / 2
-    return ">" . (currentListDepth + s:HeadingDepthOfLine(a:lnum))
+    return ">" . (currentListDepth + s:HeadingDepthOfLine(a:lnum) - b:shortestHeader)
   endif
   if thisline == ""
     return -1
   endif
   if thisline =~ '^ \+'
     let currentListDepth = len(matchstr(thisline, ' *')) / 2
-    return (currentListDepth + s:HeadingDepthOfLine(a:lnum))
+    return (currentListDepth + s:HeadingDepthOfLine(a:lnum) - b:shortestHeader)
   endif
 
+  " Header folding
   let depth = HeadingDepth(v:lnum)
   if depth > 0
-    return ">".depth
+    return ">".(depth - b:shortestHeader)
   else
     return "="
   endif
@@ -75,6 +80,8 @@ endfunction
 
 function! HeadingDepth(lnum)
   let level=0
+
+
   let thisline = getline(a:lnum)
   if thisline =~ '^#\+\s\+'
     let hashCount = len(matchstr(thisline, '^#\{1,6}'))
@@ -155,6 +162,29 @@ function! s:FoldText()
 
   return indent.spaces_1.title.spaces_2.linecount
 endfunction
+
+function! s:UpdateShortestHeader()
+  if exists('b:shortestHeaderUpdateTick') &&
+        \ b:shortestHeaderUpdateTick == b:changedtick
+    return
+  endif
+
+  let b:shortestHeaderUpdateTick = b:changedtick
+
+  let totalLines = line('$')
+  let b:shortestHeader = -1
+  for lnum in range(1, totalLines)
+    let lineHeaderDepth = HeadingDepth(lnum)
+    if lineHeaderDepth == 0
+      continue
+    endif
+    if b:shortestHeader == -1 || b:shortestHeader > lineHeaderDepth
+      let b:shortestHeader = lineHeaderDepth
+    endif
+  endfor
+  let b:shortestHeader = b:shortestHeader - 1
+endfunction
+
 
 " API {{{1
 function! ToggleMarkdownFoldexpr()
