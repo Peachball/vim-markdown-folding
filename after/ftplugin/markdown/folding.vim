@@ -48,7 +48,7 @@ function! NestedMarkdownFolds(lnum)
   endif
 
   " Header folding
-  let depth = HeadingDepth(v:lnum)
+  let depth = HeadingDepth(a:lnum)
   if depth > 0
     return ">".(depth - b:shortestHeader)
   else
