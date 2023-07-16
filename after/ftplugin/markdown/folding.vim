@@ -30,6 +30,12 @@ function! NestedMarkdownFolds(lnum)
     return "s1"
   endif
 
+  " Header folding
+  let depth = HeadingDepth(a:lnum)
+  if depth > 0
+    return ">".(depth - b:shortestHeader)
+  endif
+
   " Add list folding as well
   " Do so via the following:
   " 1. Figure out if list starts (prefix "-")
@@ -43,17 +49,13 @@ function! NestedMarkdownFolds(lnum)
     return -1
   endif
   if thisline =~ '^ \+'
-    let currentListDepth = len(matchstr(thisline, ' *')) / 2
-    return (currentListDepth + s:HeadingDepthOfLine(a:lnum) - b:shortestHeader)
-  endif
-
-  " Header folding
-  let depth = HeadingDepth(a:lnum)
-  if depth > 0
-    return ">".(depth - b:shortestHeader)
-  else
     return "="
   endif
+  if nextline =~ '^ *-'
+    return ">" . (s:HeadingDepthOfLine(a:lnum) - b:shortestHeader + 1)
+  endif
+
+  return "="
 endfunction
 
 " Helpers {{{1
