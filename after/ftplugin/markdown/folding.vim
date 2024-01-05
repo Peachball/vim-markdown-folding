@@ -55,7 +55,11 @@ function! NestedMarkdownFolds(lnum)
     return ">" . (s:HeadingDepthOfLine(a:lnum) - b:shortestHeader + 1)
   endif
 
-  return "="
+  return s:HeadingDepthOfLine(a:lnum) - b:shortestHeader
+endfunction
+
+function HeadingDepthOfLinePub(lnum)
+  echo s:HeadingDepthOfLine(a:lnum)
 endfunction
 
 " Helpers {{{1
