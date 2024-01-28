@@ -22,18 +22,24 @@ function! NestedMarkdownFolds(lnum)
   let nextline = getline(a:lnum + 1)
 
   call s:UpdateShortestHeader()
+  let currentHeadingDepth = s:HeadingDepthOfLine(a:lnum) - b:shortestHeader
 
-  " Code block folding
-  if thisline =~ '^```.*$' && prevline =~ '^\s*$'  " start of a fenced block
-    return "a1"
-  elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
-    return "s1"
+  if LineIsFenced(a:lnum) && thisline !~ '^```.*$'
+    return currentHeadingDepth + 1
   endif
 
   " Header folding
   let depth = HeadingDepth(a:lnum)
   if depth > 0
     return ">".(depth - b:shortestHeader)
+  endif
+
+
+  " Code block folding
+  if thisline =~ '^```.*$' && prevline =~ '^\s*$'  " start of a fenced block
+    return ">" . (currentHeadingDepth + 1)
+  elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
+    return -1
   endif
 
   " Add list folding as well
@@ -43,7 +49,7 @@ function! NestedMarkdownFolds(lnum)
   " 3. Set fold level by adding heading fold level to list fold level
   if thisline =~ '^ *-'
     let currentListDepth = (len(matchstr(thisline, ' *-')) + 1) / 2
-    return ">" . (currentListDepth + s:HeadingDepthOfLine(a:lnum) - b:shortestHeader)
+    return ">" . (currentListDepth + currentHeadingDepth)
   endif
   if thisline == ""
     return -1
@@ -52,10 +58,10 @@ function! NestedMarkdownFolds(lnum)
     return "="
   endif
   if nextline =~ '^ *-'
-    return ">" . (s:HeadingDepthOfLine(a:lnum) - b:shortestHeader + 1)
+    return ">" . (currentHeadingDepth + 1)
   endif
 
-  return s:HeadingDepthOfLine(a:lnum) - b:shortestHeader
+  return currentHeadingDepth
 endfunction
 
 function HeadingDepthOfLinePub(lnum)
