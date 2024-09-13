@@ -39,7 +39,7 @@ function! NestedMarkdownFolds(lnum)
   if thisline =~ '^```.*$' && prevline =~ '^\s*$'  " start of a fenced block
     return ">" . (currentHeadingDepth + 1)
   elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
-    return -1
+    return "s1"
   endif
 
   " Add list folding as well
