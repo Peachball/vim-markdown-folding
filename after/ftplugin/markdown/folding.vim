@@ -24,8 +24,16 @@ function! NestedMarkdownFolds(lnum)
   call s:UpdateShortestHeader()
   let currentHeadingDepth = s:HeadingDepthOfLine(a:lnum) - b:shortestHeader
 
-  if LineIsFenced(a:lnum) && thisline !~ '^```.*$'
-    return currentHeadingDepth + 1
+  " Code block folding
+  if LineIsFenced(a:lnum)
+    if thisline !~ '^```.*$'
+      return currentHeadingDepth + 1
+    endif
+    if thisline =~ '^```.*$' && !LineIsFenced(a:lnum-1)  " start of a fenced block
+      return ">" . (currentHeadingDepth + 1)
+    elseif thisline =~ '^```$' && !LineIsFenced(a:lnum+1)  " end of a fenced block
+      return "<" . (currentHeadingDepth + 1)
+    endif
   endif
 
   " Header folding
@@ -35,12 +43,6 @@ function! NestedMarkdownFolds(lnum)
   endif
 
 
-  " Code block folding
-  if thisline =~ '^```.*$' && prevline =~ '^\s*$'  " start of a fenced block
-    return ">" . (currentHeadingDepth + 1)
-  elseif thisline =~ '^```$' && nextline =~ '^\s*$'  " end of a fenced block
-    return "s1"
-  endif
 
   " Add list folding as well
   " Do so via the following:
@@ -51,9 +53,7 @@ function! NestedMarkdownFolds(lnum)
     let currentListDepth = (len(matchstr(thisline, ' *-')) + 1) / 2
     return ">" . (currentListDepth + currentHeadingDepth)
   endif
-  if thisline == ""
-    return -1
-  endif
+
   if thisline =~ '^ \+'
     return "="
   endif
@@ -177,11 +177,11 @@ endfunction
 
 function! s:UpdateShortestHeader()
   if exists('b:shortestHeaderUpdateTick') &&
-        \ b:shortestHeaderUpdateTick == b:changedtick
+        \ b:shortestHeaderUpdateTick == b:changedtick + 1
     return
   endif
 
-  let b:shortestHeaderUpdateTick = b:changedtick
+  let b:shortestHeaderUpdateTick = b:changedtick + 1
 
   let totalLines = line('$')
   let b:shortestHeader = -1
@@ -235,7 +235,7 @@ endif
 
 let &l:foldexpr =
   \ g:markdown_fold_style ==# 'nested'
-  \ ? 'NestedMarkdownFolds()'
+  \ ? 'NestedMarkdownFolds(v:lnum)'
   \ : 'StackedMarkdownFolds()'
 
 " Teardown {{{1
