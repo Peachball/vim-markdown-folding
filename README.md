@@ -1,5 +1,11 @@
 This plugin enables folding by section headings in markdown documents.
 
+## Todo
+
+- make list fold preview not have extra space at start
+
+### Done
+
 ## Features
 
 This plugin adds the ability to fold the following markdown elements:
@@ -11,7 +17,7 @@ This plugin adds the ability to fold the following markdown elements:
 
 ## Usage
 By default this plugin will use "Stacked" folding which looks like this when
-everything is folded. 
+everything is folded.
 
 ```
   1 ##    Topmost heading                         [3 lines]---------------------------
@@ -62,21 +68,21 @@ with Markdown. In the short term you can `:set filetype=markdown`
 
 There are a variety of ways Vim can be instructed to "fold" things. When you add
 a plugin to support a new language / format the plugin will tell Vim "Hey here's
-the method to use for figuring out the start and end of a fold with this language". 
+the method to use for figuring out the start and end of a fold with this language".
 This plugin uses a `foldmethod` of
-`expr`. Running `:set foldmethod?` should return 
+`expr`. Running `:set foldmethod?` should return
 `foldmethod=expr`. If you see something else then you've likely got some other
-Vim configuration overriding the setting in the plugin. If, after running 
+Vim configuration overriding the setting in the plugin. If, after running
 `:set foldmethod=expr`, things still aren't working, then something is most likely
 amiss in your `~/.vimrc` (or `~/.config/nvim/init.vim` if you use NeoVim).
 
 
 ## Contributing
-PRs are always a welcome thing, but it should be noted that the current intent is to keep this plugin pretty focused on folding Markdown. 
+PRs are always a welcome thing, but it should be noted that the current intent is to keep this plugin pretty focused on folding Markdown.
 
-All new PRs should include tests. If you're fixing a bug please add a test to make sure it never comes back. If you're adding a new feature please add tests to make sure we never break it with future changes. 
+All new PRs should include tests. If you're fixing a bug please add a test to make sure it never comes back. If you're adding a new feature please add tests to make sure we never break it with future changes.
 
-The tests are currently all contained in `t/folding.vim` 
+The tests are currently all contained in `t/folding.vim`
 
 ### Running Tests
 The test setup requires Ruby. For those unfamiliar with Ruby development you'll want to cd into the `vim-markdown-folding` directory and run the following commands in the terminal.
@@ -110,7 +116,7 @@ Result: PASS
 Created by [Drew Neil](https://github.com/nelstrom). Copyright Drew Niel and all the contributors.
 Distributed under the same terms as Vim itself. See `:help license`.
 
-With community improvements by: 
+With community improvements by:
 
 * [Aaron O'Leary](https://github.com/aaren/)
 * [masukomi](https://github.com/masukomi/)

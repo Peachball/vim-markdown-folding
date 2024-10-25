@@ -21,6 +21,7 @@ function! NestedMarkdownFolds(lnum)
   let prevline = getline(a:lnum - 1)
   let nextline = getline(a:lnum + 1)
 
+
   call s:UpdateShortestHeader()
   let currentHeadingDepth = s:HeadingDepthOfLine(a:lnum) - b:shortestHeader
 
@@ -81,6 +82,10 @@ function! s:HeadingDepthOfLine(lnum)
     call cursor(currentLine, 1)
     let [prevHeadingLnum, prevHeadingCol] = searchpos('^#\+', 'b')
     let currentLine = prevHeadingLnum
+    if currentLine == 0
+      let currentHeadingDepth = 0
+      break
+    endif
     if LineIsFenced(currentLine)
       continue
     endif
