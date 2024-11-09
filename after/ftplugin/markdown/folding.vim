@@ -17,16 +17,21 @@ function! StackedMarkdownFolds()
 endfunction
 
 function! NestedMarkdownFolds(lnum)
+  " Syntax loading seems to depend on the foldexpr. Not sure how to break the
+  " dependency, so adding this check to avoid that edge case
+  if !(exists("b:current_syntax") && b:current_syntax ==# 'markdown')
+    return 0
+  endif
   let thisline = getline(a:lnum)
   let prevline = getline(a:lnum - 1)
   let nextline = getline(a:lnum + 1)
-
 
   call s:UpdateShortestHeader()
   let currentHeadingDepth = s:HeadingDepthOfLine(a:lnum) - b:shortestHeader
 
   " Code block folding
   if LineIsFenced(a:lnum)
+    echo currentHeadingDepth . ", " . b:shortestHeader
     if thisline !~ '^```.*$'
       return currentHeadingDepth + 1
     endif
@@ -75,6 +80,9 @@ function! s:SID()
 endfunction
 
 function! s:HeadingDepthOfLine(lnum)
+  if LineIsFenced(a:lnum)
+    return 0
+  endif
   let currentHeadingDepth = -1
   let cursorPosition = [line("."), col(".")]
   let currentLine = a:lnum
@@ -199,7 +207,11 @@ function! s:UpdateShortestHeader()
       let b:shortestHeader = lineHeaderDepth
     endif
   endfor
-  let b:shortestHeader = b:shortestHeader - 1
+  if b:shortestHeader == -1
+    let b:shortestHeader = 0
+  else
+    let b:shortestHeader = b:shortestHeader - 1
+  endif
 endfunction
 
 
