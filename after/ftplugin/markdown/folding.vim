@@ -80,21 +80,19 @@ function! s:SID()
 endfunction
 
 function! s:HeadingDepthOfLine(lnum)
-  if LineIsFenced(a:lnum)
-    return 0
-  endif
   let currentHeadingDepth = -1
   let cursorPosition = [line("."), col(".")]
   let currentLine = a:lnum
-  while currentHeadingDepth == -1
+  while currentHeadingDepth ==# -1
     call cursor(currentLine, 1)
-    let [prevHeadingLnum, prevHeadingCol] = searchpos('^#\+', 'b')
+    let [prevHeadingLnum, prevHeadingCol] = searchpos('^#\+', 'bW')
     let currentLine = prevHeadingLnum
-    if currentLine == 0
+    if currentLine ==# 0
       let currentHeadingDepth = 0
       break
     endif
     if LineIsFenced(currentLine)
+      let currentLine = currentLine - 1
       continue
     endif
     let currentHeadingDepth = HeadingDepth(currentLine)
@@ -190,7 +188,7 @@ endfunction
 
 function! s:UpdateShortestHeader()
   if exists('b:shortestHeaderUpdateTick') &&
-        \ b:shortestHeaderUpdateTick == b:changedtick + 1
+        \ b:shortestHeaderUpdateTick ==# b:changedtick + 1
     return
   endif
 
@@ -200,14 +198,14 @@ function! s:UpdateShortestHeader()
   let b:shortestHeader = -1
   for lnum in range(1, totalLines)
     let lineHeaderDepth = HeadingDepth(lnum)
-    if lineHeaderDepth == 0
+    if lineHeaderDepth ==# 0
       continue
     endif
-    if b:shortestHeader == -1 || b:shortestHeader > lineHeaderDepth
+    if b:shortestHeader ==# -1 || b:shortestHeader > lineHeaderDepth
       let b:shortestHeader = lineHeaderDepth
     endif
   endfor
-  if b:shortestHeader == -1
+  if b:shortestHeader ==# -1
     let b:shortestHeader = 0
   else
     let b:shortestHeader = b:shortestHeader - 1
