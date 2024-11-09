@@ -3,6 +3,9 @@ This plugin enables folding by section headings in markdown documents.
 ## Todo
 
 - make list fold preview not have extra space at start
+- fix issue with folds with nested header in fenced code block
+- figure out cleaner way to enable code block folds on startup without returning
+  dummy value
 
 ### Done
 
