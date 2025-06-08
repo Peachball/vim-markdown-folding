@@ -31,7 +31,6 @@ function! NestedMarkdownFolds(lnum)
 
   " Code block folding
   if LineIsFenced(a:lnum)
-    echo currentHeadingDepth . ", " . b:shortestHeader
     if thisline !~ '^```.*$'
       return currentHeadingDepth + 1
     endif
